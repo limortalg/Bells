@@ -34,6 +34,17 @@ public class DashboardFragment extends Fragment {
         if (getArguments() != null) {
             userType = getArguments().getString("userType", "student");
         }
+
+        // initialize notifications
+        SchoolLesson next = getNextClass();
+        String notificationSubject = "Prepare to go to " + next.getBuilding() + ", Room " + next.getRoom() + " for " + next.getSubject();
+        AlarmScheduler.scheduleLessonNotification(
+                getContext(),
+                next.getStartTime(),
+                notificationSubject,
+                next.getHasBreakBefore()
+        );
+
     }
 
     @Nullable
@@ -95,7 +106,79 @@ public class DashboardFragment extends Fragment {
         return view;
     }
 
-    private void setCurrentAndNextClass(TextView currentClassTextView, TextView nextClassTextView,
+    private SchoolLesson getNextClass() {
+        Calendar now = Calendar.getInstance();
+        int currentHour = now.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = now.get(Calendar.MINUTE);
+        int dayOfWeek = now.get(Calendar.DAY_OF_WEEK);
+        int totalDays = Integer.parseInt(dbHelper.getSettings("total_days", "5"));
+        int currentDay = Math.min(dayOfWeek, totalDays);
+
+        String currentClass = "";
+        String nextClass = "";
+        String currentPhotoPath = "";
+        String nextPhotoPath = "";
+
+        boolean inLesson = false;
+        int nextLesson = 1;
+        boolean hasBreakBefore = true;
+
+        // Find current class
+        for (int lesson = 1; lesson <= 9; lesson++) {
+            String startHourStr = dbHelper.getSettings("lesson_" + lesson + "_start_hour", "0");
+            String startMinuteStr = dbHelper.getSettings("lesson_" + lesson + "_start_minute", "0");
+            String endHourStr = dbHelper.getSettings("lesson_" + lesson + "_end_hour", "0");
+            String endMinuteStr = dbHelper.getSettings("lesson_" + lesson + "_end_minute", "0");
+
+            int startHour = Integer.parseInt(startHourStr);
+            int startMinute = Integer.parseInt(startMinuteStr);
+            int endHour = Integer.parseInt(endHourStr);
+            int endMinute = Integer.parseInt(endMinuteStr);
+
+            int startTime = startHour * 60 + startMinute;
+            int endTime = endHour * 60 + endMinute;
+            int currentTime = currentHour * 60 + currentMinute;
+
+            if (currentTime < startTime) {
+                nextLesson = 1;
+                break;
+            } else {
+                if (currentTime >= startTime && currentTime < endTime) {
+                    nextLesson = lesson + 1;
+                    // TODO check if has break before
+                    break;
+                }
+            }
+        }
+        if (nextLesson == 10) // next lession is next day
+        {
+            nextLesson = 1;
+            if (currentDay < totalDays)
+            {
+                currentDay++;
+            }
+            else {
+                // next lesson is the first one next week
+                currentDay = 1;
+            }
+        }
+
+        String subject = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_subject", "-");
+        String room = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_room", "");
+        String building = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_building", "");
+        String teacherGroup = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_teacher_group", "");
+
+        String startHour = dbHelper.getSettings("lesson_" + nextLesson + "_start_hour", "0");
+        String startMinute = dbHelper.getSettings("lesson_" + nextLesson + "_start_minute", "0");
+        String endHour= dbHelper.getSettings("lesson_" + nextLesson + "_end_hour", "0");
+        String endMinute = dbHelper.getSettings("lesson_" + nextLesson + "_end_minute", "0");
+        String startTimeStr = String.format("%s:%s", startHour, startMinute);
+        String endTimeStr = String.format("%s:%s", endHour, endMinute);
+        return new SchoolLesson(currentDay, nextLesson, subject, teacherGroup, building, room, startTimeStr, endTimeStr, hasBreakBefore);
+
+    }
+
+        private void setCurrentAndNextClass(TextView currentClassTextView, TextView nextClassTextView,
                                         ImageView currentClassPhoto, ImageView nextClassPhoto, int totalDays) {
         Calendar now = Calendar.getInstance();
         int currentHour = now.get(Calendar.HOUR_OF_DAY);

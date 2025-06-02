@@ -44,8 +44,9 @@ public class ScheduleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 String teacherGroup = dbHelper.getSettings("day_" + day + "_lesson_" + lesson + "_teacher_group", "");
                 String building = dbHelper.getSettings("day_" + day + "_lesson_" + lesson + "_building", "");
                 String room = dbHelper.getSettings("day_" + day + "_lesson_" + lesson + "_room", "");
+                // TODO - check if has break before
 
-                lessonRow.add(new SchoolLesson(day, lesson, subject, teacherGroup, building, room, startHour + ":" + startMinute, endHour + ":" + endMinute));
+                lessonRow.add(new SchoolLesson(day, lesson, subject, teacherGroup, building, room, startHour + ":" + startMinute, endHour + ":" + endMinute, true));
             }
             scheduleData.add(lessonRow);
         }
@@ -74,14 +75,15 @@ public class ScheduleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             headerHolder.lessonTime.setText("");
             headerHolder.subjectContainer.removeAllViews();
 
-            int spaceBefore = 170; // TODO - better implementation
+            int spaceBefore = 80; // TODO - better implementation
             for (int day = 1; day <= totalDays; day++) {
                 TextView dayView = new TextView(holder.itemView.getContext());
                 dayView.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
                 dayView.setText(day <= DAY_NAMES.length ? DAY_NAMES[day - 1] : "Day " + day);
-                dayView.setPadding(8, 8, spaceBefore, 8);
-                spaceBefore = 40;
+                dayView.setPadding(0, 0, spaceBefore, 0);
+                //dayView.setPadding(0, 0, 0, 0);
+                spaceBefore = 80;
                 dayView.setTextSize(14);
                 headerHolder.subjectContainer.addView(dayView);
             }
@@ -89,15 +91,18 @@ public class ScheduleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             LessonViewHolder lessonHolder = (LessonViewHolder) holder;
             List<SchoolLesson> lessons = scheduleData.get(position - 1);
             SchoolLesson firstLesson = lessons.get(0);
-            lessonHolder.lessonTime.setText(firstLesson.getLessonNumber() + " (" + firstLesson.getStartTime() + "–" + firstLesson.getEndTime() + ")");
+            lessonHolder.lessonTime.setSingleLine(false);
+            //lessonHolder.lessonTime.setText(firstLesson.getLessonNumber() + " (" + firstLesson.getStartTime() + "–" + firstLesson.getEndTime() + ")");
+            lessonHolder.lessonTime.setText(firstLesson.getLessonNumber() + "\n" + firstLesson.getStartTime() + "\n" + firstLesson.getEndTime() + "");
             lessonHolder.subjectContainer.removeAllViews();
 
             for (SchoolLesson lesson : lessons) {
                 LinearLayout cell = new LinearLayout(holder.itemView.getContext());
                 cell.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
                 cell.setOrientation(LinearLayout.VERTICAL);
-                cell.setPadding(8, 8, 40, 8);
+                cell.setPadding(0, 0, 40, 0);
+                //cell.setPadding(0, 0, 0, 0);
 
                 TextView subjectView = new TextView(holder.itemView.getContext());
                 if (!lesson.getSubject().isEmpty() && !lesson.getSubject().equals("-") && !lesson.getSubject().equals("בחר"))

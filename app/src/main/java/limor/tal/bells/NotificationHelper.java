@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
+
 import androidx.core.app.NotificationCompat;
 import java.util.UUID;
 
@@ -23,6 +25,21 @@ class NotificationHelper {
         createNotificationChannel();
     }
 
+    public static void createChannel(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "lesson_channel",
+                    "Lesson Notifications",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            channel.setDescription("Notifies before lessons");
+
+            NotificationManager manager = context.getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+    }
     private void createNotificationChannel() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -34,11 +51,11 @@ class NotificationHelper {
         }
     }
 
-    public void scheduleNotification(Lesson lesson, long triggerTime, boolean withSound, String user_type) {
+    public void scheduleNotification(SchoolLesson lesson, long triggerTime, boolean withSound, String user_type) {
         Intent intent = new Intent(context, NotificationReceiver.class);
         intent.putExtra("user_type", user_type);
         intent.putExtra("subject", lesson.getSubject());
-        intent.putExtra("teacher_or_group", lesson.getTeacherOrGroup());
+        intent.putExtra("teacher_or_group", lesson.getTeacherGroup());
         intent.putExtra("building", lesson.getBuilding());
         intent.putExtra("room", lesson.getRoom());
         intent.putExtra("with_sound", withSound);

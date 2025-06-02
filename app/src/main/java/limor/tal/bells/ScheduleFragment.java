@@ -34,10 +34,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class ScheduleFragment extends Fragment {
 
-    private SchoolDatabaseHelper dbHelper;
+    private static SchoolDatabaseHelper dbHelper;
     private int currentDay;
     private int totalDays;
     private String userType;
@@ -115,8 +116,9 @@ public class ScheduleFragment extends Fragment {
 
             TextView lessonLabel = lessonRow.findViewById(R.id.lesson_label);
             Spinner subjectSpinner = lessonRow.findViewById(R.id.subject_spinner);
-            ImageView teacherPhoto = lessonRow.findViewById(R.id.teacher_photo);
-            Button setPhotoButton = lessonRow.findViewById(R.id.set_photo_button);
+            //ImageView teacherPhoto = lessonRow.findViewById(R.id.teacher_photo);
+            //Button setPhotoButton = lessonRow.findViewById(R.id.set_photo_button);
+            ImageView setPhoto = lessonRow.findViewById(R.id.set_photo_button);
             EditText teacherGroupInput = lessonRow.findViewById(R.id.teacher_group_input);
             EditText building = lessonRow.findViewById(R.id.building_input);
             EditText room = lessonRow.findViewById(R.id.room_input);
@@ -133,8 +135,8 @@ public class ScheduleFragment extends Fragment {
 
             if (userType.equals("teacher")) {
                 teacherGroupInput.setHint("קבוצה");
-                teacherPhoto.setVisibility(View.GONE);
-                setPhotoButton.setVisibility(View.GONE);
+                //teacherPhoto.setVisibility(View.GONE);
+                setPhoto.setVisibility(View.GONE);
             }
             else
                 teacherGroupInput.setHint("מורה");
@@ -162,19 +164,20 @@ public class ScheduleFragment extends Fragment {
                     teacherGroupInput.setText(savedTeacherGroup);
 
                 // Load saved teacher photo
-                String savedPhotoPath = dbHelper.getSettings("day_" + currentDay + "_lesson_" + i + "_teacher_photo", "");
+                /*String savedPhotoPath = dbHelper.getSettings("day_" + currentDay + "_lesson_" + i + "_teacher_photo", "");
                 if (!savedPhotoPath.isEmpty()) {
                     Bitmap bitmap = BitmapFactory.decodeFile(savedPhotoPath);
                     if (bitmap != null) {
                         teacherPhoto.setImageBitmap(bitmap);
                     }
-                }
+                }*/
             }
 
-            // Set photo button listener
             // TODO add camera !!
+
+            // Set photo button listener
             final int lesson = i;
-            setPhotoButton.setOnClickListener(v -> {
+            setPhoto.setOnClickListener(v -> {
                 currentLessonForPhoto = lesson;
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 photoPickerLauncher.launch(intent);
@@ -254,6 +257,17 @@ public class ScheduleFragment extends Fragment {
 
             if (currentDay == totalDays)
             {
+                // initialize notifications
+                SchoolLesson next = getNextClass();
+                String notificationSubject = "Prepare to go to " + next.getBuilding() + ", Room " + next.getRoom() + " for " + next.getSubject();
+                AlarmScheduler.scheduleLessonNotification(
+                            getContext(),
+                            next.getStartTime(),
+                            notificationSubject,
+                            next.getHasBreakBefore()
+                    );
+
+                // switch to dashboard
                 DashboardFragment dashboardFragment = new DashboardFragment();
                 Bundle args = new Bundle();
                 args.putInt("totalDays", totalDays);
@@ -330,7 +344,9 @@ public class ScheduleFragment extends Fragment {
         }
 
         LinearLayout lessonRow = (LinearLayout) lessonContainer.getChildAt(lesson - 1);
-        ImageView teacherPhoto = lessonRow.findViewById(R.id.teacher_photo);
+        // TODO - handle camera
+
+        /*ImageView teacherPhoto = lessonRow.findViewById(R.id.teacher_photo);
 
         if (teacherPhoto == null) {
             return; // Prevent NullPointerException
@@ -352,5 +368,78 @@ public class ScheduleFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+         */
+    }
+
+    public static SchoolLesson getNextClass() {
+        Calendar now = Calendar.getInstance();
+        int currentHour = now.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = now.get(Calendar.MINUTE);
+        int dayOfWeek = now.get(Calendar.DAY_OF_WEEK);
+        int totalDays = Integer.parseInt(dbHelper.getSettings("total_days", "5"));
+        int currentDay = Math.min(dayOfWeek, totalDays);
+
+        String currentClass = "";
+        String nextClass = "";
+        String currentPhotoPath = "";
+        String nextPhotoPath = "";
+
+        boolean hasBreak = true;
+        int nextLesson = 1;
+
+        // Find current class
+        for (int lesson = 1; lesson <= 9; lesson++) {
+            String startHourStr = dbHelper.getSettings("lesson_" + lesson + "_start_hour", "0");
+            String startMinuteStr = dbHelper.getSettings("lesson_" + lesson + "_start_minute", "0");
+            String endHourStr = dbHelper.getSettings("lesson_" + lesson + "_end_hour", "0");
+            String endMinuteStr = dbHelper.getSettings("lesson_" + lesson + "_end_minute", "0");
+
+            int startHour = Integer.parseInt(startHourStr);
+            int startMinute = Integer.parseInt(startMinuteStr);
+            int endHour = Integer.parseInt(endHourStr);
+            int endMinute = Integer.parseInt(endMinuteStr);
+
+            int startTime = startHour * 60 + startMinute;
+            int endTime = endHour * 60 + endMinute;
+            int currentTime = currentHour * 60 + currentMinute;
+
+            if (currentTime < startTime) {
+                nextLesson = 1;
+                break;
+            } else {
+                if (currentTime >= startTime && currentTime < endTime) {
+                    nextLesson = lesson + 1;
+                    // TODO check if there is a break before next lesson
+                    break;
+                }
+            }
+        }
+        if (nextLesson == 10) // next lesson is next day
+        {
+            nextLesson = 1;
+            if (currentDay < totalDays)
+            {
+                currentDay++;
+            }
+            else {
+                // next lesson is the first one next week
+                currentDay = 1;
+            }
+        }
+
+        String subject = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_subject", "-");
+        String room = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_room", "");
+        String building = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_building", "");
+        String teacherGroup = dbHelper.getSettings("day_" + currentDay + "_lesson_" + nextLesson + "_teacher_group", "");
+
+        String startHour = dbHelper.getSettings("lesson_" + nextLesson + "_start_hour", "0");
+        String startMinute = dbHelper.getSettings("lesson_" + nextLesson + "_start_minute", "0");
+        String endHour= dbHelper.getSettings("lesson_" + nextLesson + "_end_hour", "0");
+        String endMinute = dbHelper.getSettings("lesson_" + nextLesson + "_end_minute", "0");
+        String startTimeStr = String.format("%s:%s", startHour, startMinute);
+        String endTimeStr = String.format("%s:%s", endHour, endMinute);
+        return new SchoolLesson(currentDay, nextLesson, subject, teacherGroup, building, room, startTimeStr, endTimeStr, hasBreak);
+
     }
 }

@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> galleryLauncher;
     private ActivityResultLauncher<String> cameraPermissionLauncher;
     private ActivityResultLauncher<String> audioPermissionLauncher;
+    private ActivityResultLauncher<String> postNotificationPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +102,15 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        postNotificationPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (!isGranted) {
+                        Toast.makeText(this, "Notification permission denied. Reminders will not work.", Toast.LENGTH_LONG).show();
+                }
+            });
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -108,6 +118,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         }
+
+        requestPostNotification();
+        NotificationHelper.createChannel(this);
+
 
         if (savedInstanceState == null) {
             if (dbHelper.isSetupComplete() && dbHelper.hasPersonalSchedule()) {
@@ -119,6 +133,18 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, dashboardFragment)
                         .commit();
+
+                /*
+                // initialize notifications
+                SchoolLesson next = ScheduleFragment.getNextClass();
+                String notificationSubject = "Prepare to go to " + next.getBuilding() + ", Room " + next.getRoom() + " for " + next.getSubject();
+                AlarmScheduler.scheduleLessonNotification(
+                        this,
+                        next.getStartTime(),
+                        notificationSubject,
+                        next.getHasBreakBefore()
+                );*/
+
             } else {
                 SetupFragment setupFragment = new SetupFragment();
                 currentFragment = setupFragment;
@@ -198,5 +224,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void requestGallery() {
         dispatchGalleryIntent();
+    }
+
+    public void requestPostNotification() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            postNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+        }
     }
 }
