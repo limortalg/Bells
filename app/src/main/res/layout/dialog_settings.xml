@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Time before lesson after break (ms)"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/time_before_break"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Time before lesson without break (ms)"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/time_before_no_break"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number" />
+
+    <CheckBox
+        android:id="@+id/sound_after_break"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sound for lessons after break" />
+
+    <CheckBox
+        android:id="@+id/sound_no_break"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sound for lessons without break" />
+
+    <Button
+        android:id="@+id/select_ringtone_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Notification Sound" />
+
+</LinearLayout>

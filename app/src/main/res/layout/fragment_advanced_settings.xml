@@ -1,0 +1,62 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/ringtone_name_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Default" />
+
+    <Button
+        android:id="@+id/select_ringtone_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="בחר צליל להתראות" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="מתי לקבל התראה" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="כמה דקות לפני סוף שיעור כשאין הפסקה" />
+
+    <EditText
+        android:id="@+id/notification_without_break"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="1"
+        android:inputType="number"
+        android:text="1" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="כמה דקות לפני סוף הפסקה" />
+
+    <EditText
+        android:id="@+id/notification_with_break"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="3"
+        android:inputType="number"
+        android:text="3" />
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="שמור הגדרות" />
+
+
+</LinearLayout>

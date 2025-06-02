@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bells</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="total_days_prompt">Select Total Days</string>
+    <string name="description_for_icon">הקלט במקום להקליד</string>
+</resources>

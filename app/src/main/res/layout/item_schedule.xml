@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/lesson_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textSize="16sp" />
+
+    <Spinner
+        android:id="@+id/subject_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/teacher_or_group_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Teacher(for student)/Group(for teacher)" />
+
+    <Button
+        android:id="@+id/speech_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Use Speech" />
+
+    <EditText
+        android:id="@+id/building_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Building" />
+
+    <EditText
+        android:id="@+id/room_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Room" />
+
+    <ImageView
+        android:id="@+id/photo_view"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/camera_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Take Photo" />
+
+    <Button
+        android:id="@+id/gallery_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose from Gallery" />
+</LinearLayout>
